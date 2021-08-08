@@ -32,13 +32,27 @@ class _HomeState extends State<Home> {
 
   Future<void> getTime(String timezone) async {
     http.Response response = await http
-        .get(Uri.parse('http://worldtimeapi.org/api/timezone/${timezone}'));
+        .get(Uri.parse('http://worldtimeapi.org/api/timezone/$timezone'));
     Map data = jsonDecode(response.body);
     DateTime timeNow = DateTime.parse(data['datetime']);
     String utcOffset = data['utc_offset'];
     utcOffset = utcOffset.substring(0, 3);
     timeNow = timeNow.add(Duration(hours: int.parse(utcOffset)));
     setState(() => time = DateFormat.jm().format(timeNow));
+  }
+
+  Future<void> showTime() async {
+    if (widget.timezone == null) {
+      String timezone = await getUserTimezone();
+      await getTime(timezone);
+    } else
+      await getTime(widget.timezone!);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    showTime();
   }
 
   @override
@@ -51,13 +65,7 @@ class _HomeState extends State<Home> {
               child: Text(
                 'Refresh',
               ),
-              onPressed: () async {
-                if (widget.timezone == null) {
-                  String timezone = await getUserTimezone();
-                  await getTime(timezone);
-                } else
-                  await getTime(widget.timezone!);
-              }),
+              onPressed: showTime),
           SizedBox(
             width: 50,
           ),
@@ -68,8 +76,9 @@ class _HomeState extends State<Home> {
             width: 50,
           ),
           ElevatedButton(
-              onPressed: () =>
-                  Navigator.pushReplacementNamed(context, '/locations'),
+              onPressed: () => widget.timezone == null
+                  ? Navigator.popAndPushNamed(context, '/locations')
+                  : Navigator.pop(context),
               child: Text('Edit Location'))
         ],
       )),

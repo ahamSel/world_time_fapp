@@ -28,7 +28,7 @@ class _LocationsState extends State<Locations> {
                   return Center(
                       child: ListTile(
                     onTap: () {
-                      Navigator.pushReplacement(
+                      Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => Home(
