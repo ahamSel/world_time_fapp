@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:world_time/pages/home.dart';
 
 class Locations extends StatefulWidget {
@@ -11,11 +12,22 @@ class Locations extends StatefulWidget {
 }
 
 class _LocationsState extends State<Locations> {
+  String errorSign = '';
   dynamic timezones;
-  Future getTimezones() async {
-    Response response =
-        await get(Uri.parse('http://worldtimeapi.org/api/timezone/'));
-    setState(() => timezones = jsonDecode(response.body));
+
+  Future<void> getTimezones() async {
+    try {
+      context.loaderOverlay.show();
+      Response response =
+          await get(Uri.parse('http://worldtimeapi.org/api/timezone/'));
+      context.loaderOverlay.hide();
+      setState(() => timezones = jsonDecode(response.body));
+    } catch (err) {
+      print(err.toString());
+      errorSign =
+          'Could not load timezones. Please check your internet connection.';
+      setState(() => timezones = null);
+    }
   }
 
   @override
@@ -31,8 +43,10 @@ class _LocationsState extends State<Locations> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => Home(
-                                    timezone: timezones[i],
+                              builder: (context) => LoaderOverlay(
+                                    child: Home(
+                                      timezone: timezones[i],
+                                    ),
                                   )));
                     },
                     tileColor: Colors.amber[800],
@@ -41,8 +55,17 @@ class _LocationsState extends State<Locations> {
                 },
               )
             : Center(
-                child: ElevatedButton(
-                    onPressed: getTimezones, child: Text('get timezones')),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                        onPressed: getTimezones, child: Text('Get Timezones')),
+                    SizedBox(
+                      height: 30,
+                    ),
+                    Text(errorSign)
+                  ],
+                ),
               ));
   }
 }
