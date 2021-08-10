@@ -11,17 +11,9 @@ class Loading extends StatefulWidget {
 class _LoadingState extends State<Loading> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: SpinKitFadingCircle(
-        itemBuilder: (BuildContext context, int index) {
-          return DecoratedBox(
-            decoration: BoxDecoration(
-              color: index.isEven ? Colors.blue[700] : Colors.amber[700],
-            ),
-          );
-        },
-      ),
+    return SpinKitCircle(
+      size: 70,
+      color: Colors.red,
     );
   }
 }

@@ -16,6 +16,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  String usrTimezone = '';
   String? time;
 
   Future<String> getUserTimezone() async {
@@ -39,7 +40,7 @@ class _HomeState extends State<Home> {
   Future<void> getTime(String timezone) async {
     try {
       http.Response response = await http
-          .get(Uri.parse('http://worldtimeapi.org/api/timezone/$timezone'));
+          .get(Uri.parse('https://worldtimeapi.org/api/timezone/$timezone'));
       Map data = jsonDecode(response.body);
       DateTime timeNow = DateTime.parse(data['datetime']);
       String utcOffset = data['utc_offset'];
@@ -56,8 +57,8 @@ class _HomeState extends State<Home> {
   Future<void> showTime() async {
     context.loaderOverlay.show();
     if (widget.timezone == null) {
-      String timezone = await getUserTimezone();
-      await getTime(timezone);
+      usrTimezone = await getUserTimezone();
+      await getTime(usrTimezone);
     } else
       await getTime(widget.timezone!);
     context.loaderOverlay.hide();
@@ -72,29 +73,55 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.red[100],
       body: SafeArea(
-          child: Row(
-        children: [
-          ElevatedButton(
-              child: Text(
-                'Refresh',
-              ),
-              onPressed: showTime),
-          SizedBox(
-            width: 50,
-          ),
-          Text(
-            time ?? 'Loading time...',
-          ),
-          SizedBox(
-            width: 50,
-          ),
-          ElevatedButton(
-              onPressed: () => widget.timezone == null
-                  ? Navigator.popAndPushNamed(context, '/locations')
-                  : Navigator.pop(context),
-              child: Text('Edit Location'))
-        ],
+          child: Center(
+        child: Column(
+          children: [
+            SizedBox(height: 35),
+            ElevatedButton(
+                style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.red),
+                    padding: MaterialStateProperty.all(EdgeInsets.all(8))),
+                child: Text(
+                  'Edit timezone',
+                  style: TextStyle(fontSize: 20),
+                ),
+                onPressed: () => widget.timezone == null
+                    ? Navigator.popAndPushNamed(context, '/timezones')
+                    : Navigator.pop(context)),
+            SizedBox(
+              height: 100,
+            ),
+            Center(
+                child: Text(
+              widget.timezone ?? usrTimezone,
+              style: TextStyle(fontSize: 40),
+              textAlign: TextAlign.center,
+            )),
+            SizedBox(
+              height: 50,
+            ),
+            Text(
+              time ?? 'Loading time...',
+              style: time != null
+                  ? TextStyle(fontSize: 50, fontWeight: FontWeight.w600)
+                  : TextStyle(fontSize: 14),
+            ),
+            SizedBox(
+              height: 150,
+            ),
+            ElevatedButton(
+                style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.red),
+                    padding: MaterialStateProperty.all(EdgeInsets.all(8))),
+                child: Text(
+                  'Refresh',
+                  style: TextStyle(fontSize: 20),
+                ),
+                onPressed: showTime),
+          ],
+        ),
       )),
     );
   }
