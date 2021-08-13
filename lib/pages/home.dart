@@ -72,56 +72,60 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    final keybrOnScreen = MediaQuery.of(context).viewInsets.bottom != 0;
+
     return Scaffold(
       backgroundColor: Colors.red[100],
       body: SafeArea(
           child: Center(
-        child: Column(
-          children: [
-            SizedBox(height: 35),
-            ElevatedButton(
-                style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.red),
-                    padding: MaterialStateProperty.all(EdgeInsets.all(8))),
-                child: Text(
-                  'Edit timezone',
-                  style: TextStyle(fontSize: 20),
-                ),
-                onPressed: () => widget.timezone == null
-                    ? Navigator.popAndPushNamed(context, '/timezones')
-                    : Navigator.pop(context)),
-            SizedBox(
-              height: 100,
-            ),
-            Center(
-                child: Text(
-              widget.timezone ?? usrTimezone,
-              style: TextStyle(fontSize: 40),
-              textAlign: TextAlign.center,
-            )),
-            SizedBox(
-              height: 50,
-            ),
-            Text(
-              time ?? 'Loading time...',
-              style: time != null
-                  ? TextStyle(fontSize: 50, fontWeight: FontWeight.w600)
-                  : TextStyle(fontSize: 14),
-            ),
-            SizedBox(
-              height: 150,
-            ),
-            ElevatedButton(
-                style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.red),
-                    padding: MaterialStateProperty.all(EdgeInsets.all(8))),
-                child: Text(
-                  'Refresh',
-                  style: TextStyle(fontSize: 20),
-                ),
-                onPressed: showTime),
-          ],
-        ),
+        child: !keybrOnScreen
+            ? Column(
+                children: [
+                  SizedBox(height: 35),
+                  ElevatedButton(
+                      child: Text(
+                        'Edit timezone',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      onPressed: () => widget.timezone == null
+                          ? Navigator.popAndPushNamed(context, '/timezones')
+                          : Navigator.pop(context)),
+                  SizedBox(
+                    height: 100,
+                  ),
+                  Container(
+                    width: 350,
+                    height: 100,
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Text(
+                        widget.timezone ?? usrTimezone,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(time ?? 'Loading time...',
+                      style:
+                          TextStyle(fontSize: 50, fontWeight: FontWeight.w600)),
+                  SizedBox(
+                    height: 200,
+                  ),
+                  ElevatedButton(
+                      child: Text(
+                        'Refresh',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      onPressed: showTime),
+                ],
+              )
+            : Text(
+                'Your keyboard is on the way.\nPlease lower it...',
+                style: TextStyle(fontSize: 20),
+                textAlign: TextAlign.center,
+              ),
       )),
     );
   }
