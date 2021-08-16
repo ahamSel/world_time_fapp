@@ -81,44 +81,50 @@ class _HomeState extends State<Home> {
         child: !keybrOnScreen
             ? Column(
                 children: [
-                  SizedBox(height: 35),
-                  ElevatedButton(
-                      child: Text(
-                        'Edit timezone',
-                        style: TextStyle(fontSize: 20),
-                      ),
-                      onPressed: () => widget.timezone == null
-                          ? Navigator.popAndPushNamed(context, '/timezones')
-                          : Navigator.pop(context)),
-                  SizedBox(
-                    height: 100,
-                  ),
-                  Container(
-                    width: 350,
-                    height: 100,
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      child: Text(
-                        widget.timezone ?? usrTimezone,
-                        textAlign: TextAlign.center,
-                      ),
+                  Expanded(
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: ElevatedButton(
+                          child: Text(
+                            'Edit timezone',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          onPressed: () => widget.timezone == null
+                              ? Navigator.popAndPushNamed(context, '/timezones')
+                              : Navigator.pop(context)),
                     ),
                   ),
-                  SizedBox(
-                    height: 10,
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 350,
+                          height: 100,
+                          child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: Text(
+                              widget.timezone ?? usrTimezone,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                        Text(time ?? 'Loading time...',
+                            style: TextStyle(
+                                fontSize: 50, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
                   ),
-                  Text(time ?? 'Loading time...',
-                      style:
-                          TextStyle(fontSize: 50, fontWeight: FontWeight.w600)),
-                  SizedBox(
-                    height: 200,
+                  Expanded(
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: ElevatedButton(
+                          child: Text(
+                            'Refresh',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          onPressed: showTime),
+                    ),
                   ),
-                  ElevatedButton(
-                      child: Text(
-                        'Refresh',
-                        style: TextStyle(fontSize: 20),
-                      ),
-                      onPressed: showTime),
                 ],
               )
             : Text(
