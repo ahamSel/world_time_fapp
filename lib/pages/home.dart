@@ -44,8 +44,10 @@ class _HomeState extends State<Home> {
       Map data = jsonDecode(response.body);
       DateTime timeNow = DateTime.parse(data['datetime']);
       String utcOffset = data['utc_offset'];
-      utcOffset = utcOffset.substring(0, 3);
-      timeNow = timeNow.add(Duration(hours: int.parse(utcOffset)));
+      timeNow = timeNow.add(Duration(
+          hours: int.parse(utcOffset.substring(0, 3)),
+          minutes: int.parse(
+              '${utcOffset.substring(0, 1)}${utcOffset.substring(4)}')));
       setState(() => time = DateFormat.jm().format(timeNow));
     } catch (err) {
       print(err.toString());
@@ -103,7 +105,12 @@ class _HomeState extends State<Home> {
                           child: FittedBox(
                             fit: BoxFit.contain,
                             child: Text(
-                              widget.timezone ?? usrTimezone,
+                              widget.timezone
+                                      ?.replaceAll('/', ' - ')
+                                      .replaceAll('_', ' ') ??
+                                  usrTimezone
+                                      .replaceAll('/', ' - ')
+                                      .replaceAll('_', ' '),
                               textAlign: TextAlign.center,
                             ),
                           ),

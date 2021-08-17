@@ -40,6 +40,8 @@ class _TimezonesState extends State<Timezones> {
       if (textController.text.isNotEmpty) {
         for (dynamic timezone in timezones) {
           if (timezone
+              .replaceAll('/', ' - ')
+              .replaceAll('_', ' ')
               .toLowerCase()
               .contains(textController.text.toLowerCase()))
             searchedTimezones.add(timezone);
@@ -137,7 +139,11 @@ class _TimezonesState extends State<Timezones> {
                                       title: Text(
                                         searchedTimezones.isEmpty
                                             ? timezones[i]
-                                            : searchedTimezones[i],
+                                                .replaceAll('/', ' - ')
+                                                .replaceAll('_', ' ')
+                                            : searchedTimezones[i]
+                                                .replaceAll('/', ' - ')
+                                                .replaceAll('_', ' '),
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                             color: Colors.white,
