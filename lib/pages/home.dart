@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:html/dom.dart' as dom;
@@ -9,13 +10,14 @@ import 'package:loader_overlay/loader_overlay.dart';
 class Home extends StatefulWidget {
   final String? timezone;
 
-  Home({this.timezone});
+  const Home({Key? key, this.timezone}) : super(key: key);
 
   @override
-  _HomeState createState() => _HomeState();
+  State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
+  Timer timer = Timer(const Duration(seconds: 1), () {});
   String usrTimezone = '';
   String? time;
 
@@ -32,7 +34,6 @@ class _HomeState extends State<Home> {
           .substring(1);
       return userTimezone!;
     } catch (err) {
-      print(err.toString());
       return 'error';
     }
   }
@@ -41,18 +42,25 @@ class _HomeState extends State<Home> {
     try {
       http.Response response = await http
           .get(Uri.parse('https://worldtimeapi.org/api/timezone/$timezone'));
-      Map data = jsonDecode(response.body);
-      DateTime timeNow = DateTime.parse(data['datetime']);
-      String utcOffset = data['utc_offset'];
-      timeNow = timeNow.add(Duration(
-          hours: int.parse(utcOffset.substring(0, 3)),
-          minutes: int.parse(
-              '${utcOffset.substring(0, 1)}${utcOffset.substring(4)}')));
-      setState(() => time = DateFormat.jm().format(timeNow));
+      Future.delayed(const Duration(), () {
+        Map data = jsonDecode(response.body);
+        DateTime timeNow = DateTime.parse(data['datetime']);
+        String utcOffset = data['utc_offset'];
+        timeNow = timeNow.add(Duration(
+            hours: int.parse(utcOffset.substring(0, 3)),
+            minutes: int.parse(
+                '${utcOffset.substring(0, 1)}${utcOffset.substring(4)}')));
+        setState(
+            () => time = DateFormat("yyyy-MM-dd\nh:mm:ss a").format(timeNow));
+        timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+          setState(() {
+            timeNow = timeNow.add(const Duration(seconds: 1));
+            time = DateFormat("yyyy-MM-dd\nh:mm:ss a").format(timeNow);
+          });
+        });
+      });
     } catch (err) {
-      print(err.toString());
-      setState(() =>
-          time = 'Could not load time. Please check your internet connection.');
+      setState(() => time = 'Unkown error!');
     }
   }
 
@@ -61,9 +69,10 @@ class _HomeState extends State<Home> {
     if (widget.timezone == null) {
       usrTimezone = await getUserTimezone();
       await getTime(usrTimezone);
-    } else
+    } else {
       await getTime(widget.timezone!);
-    context.loaderOverlay.hide();
+    }
+    Future.delayed(const Duration(), () => context.loaderOverlay.hide());
   }
 
   @override
@@ -73,72 +82,74 @@ class _HomeState extends State<Home> {
   }
 
   @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final keybrOnScreen = MediaQuery.of(context).viewInsets.bottom != 0;
+    if (MediaQuery.of(context).viewInsets.bottom != 0) {
+      FocusScope.of(context).unfocus();
+    }
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.red[100],
       body: SafeArea(
           child: Center(
-        child: !keybrOnScreen
-            ? Column(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
                 children: [
-                  Expanded(
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: ElevatedButton(
-                          child: Text(
-                            'Edit timezone',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                          onPressed: () => widget.timezone == null
-                              ? Navigator.popAndPushNamed(context, '/timezones')
-                              : Navigator.pop(context)),
-                    ),
+                  Text(
+                    widget.timezone
+                            ?.replaceAll('/', ' - ')
+                            .replaceAll('_', ' ')
+                            .split(' - ')
+                            .reversed
+                            .join(', ') ??
+                        usrTimezone
+                            .replaceAll('/', ' - ')
+                            .replaceAll('_', ' ')
+                            .split(' - ')
+                            .reversed
+                            .join(', '),
+                    style: const TextStyle(fontSize: 40),
+                    textAlign: TextAlign.center,
                   ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 350,
-                          height: 100,
-                          child: FittedBox(
-                            fit: BoxFit.contain,
-                            child: Text(
-                              widget.timezone
-                                      ?.replaceAll('/', ' - ')
-                                      .replaceAll('_', ' ') ??
-                                  usrTimezone
-                                      .replaceAll('/', ' - ')
-                                      .replaceAll('_', ' '),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                        Text(time ?? 'Loading time...',
-                            style: TextStyle(
-                                fontSize: 50, fontWeight: FontWeight.w600)),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: ElevatedButton(
-                          child: Text(
-                            'Refresh',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                          onPressed: showTime),
-                    ),
-                  ),
+                  const SizedBox(height: 50),
+                  Column(
+                    children: [
+                      Text(
+                        time?.split('\n')[0] ?? 'Loading...',
+                        style: const TextStyle(fontSize: 30),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        time?.split('\n')[1] ?? 'Loading...',
+                        style: const TextStyle(fontSize: 40),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  )
                 ],
-              )
-            : Text(
-                'Your keyboard is on the way.\nPlease lower it...',
-                style: TextStyle(fontSize: 20),
-                textAlign: TextAlign.center,
               ),
+              ElevatedButton(
+                  child: const Text(
+                    'Choose another region',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  onPressed: () => widget.timezone == null
+                      ? Navigator.popAndPushNamed(context, '/timezones')
+                      : Navigator.pop(context)),
+            ],
+          ),
+        ),
       )),
     );
   }

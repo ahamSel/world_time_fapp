@@ -5,22 +5,35 @@ import 'package:world_time/pages/loading.dart';
 import 'package:world_time/pages/timezones.dart';
 
 void main() {
-  runApp(MaterialApp(
-      initialRoute: '/home',
-      routes: {
-        '/home': (context) => LoaderOverlay(
-            child: Home(), useDefaultLoading: false, overlayWidget: Loading()),
-        '/timezones': (context) => LoaderOverlay(
-            child: Timezones(),
-            useDefaultLoading: false,
-            overlayWidget: Loading()),
-      },
-      theme: ThemeData(
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        initialRoute: '/home',
+        routes: {
+          '/home': (context) => const LoaderOverlay(
+              useDefaultLoading: false,
+              overlayWidget: Loading(),
+              child: Home()),
+          '/timezones': (context) => const LoaderOverlay(
+              useDefaultLoading: false,
+              overlayWidget: Loading(),
+              child: Timezones()),
+        },
+        theme: ThemeData(
           fontFamily: 'Lexend',
           primaryColor: Colors.red,
-          accentColor: Colors.red[200],
+          colorScheme:
+              ColorScheme.fromSwatch().copyWith(secondary: Colors.red[200]),
           highlightColor: Colors.redAccent,
-          inputDecorationTheme: InputDecorationTheme(
+          inputDecorationTheme: const InputDecorationTheme(
               hintStyle: TextStyle(color: Colors.red),
               border: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.red),
@@ -34,14 +47,16 @@ void main() {
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
                 overlayColor: MaterialStateProperty.all(Colors.redAccent),
-                padding: MaterialStateProperty.all(EdgeInsets.all(13)),
+                padding: MaterialStateProperty.all(const EdgeInsets.all(13)),
                 backgroundColor: MaterialStateProperty.all(Colors.red),
                 shape: MaterialStateProperty.all(RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20)))),
           ),
           scrollbarTheme: ScrollbarThemeData(
               interactive: true,
-              radius: Radius.circular(5),
+              radius: const Radius.circular(5),
               thickness: MaterialStateProperty.all(13),
-              thumbColor: MaterialStateProperty.all(Colors.red)))));
+              thumbColor: MaterialStateProperty.all(Colors.red)),
+        ));
+  }
 }
