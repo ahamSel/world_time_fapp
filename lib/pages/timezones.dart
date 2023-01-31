@@ -13,7 +13,7 @@ class Timezones extends StatefulWidget {
 }
 
 class _TimezonesState extends State<Timezones> {
-  String errorSign = 'Fetching regions...';
+  String errorSign = '';
   dynamic timezones;
   List<String> searchedTimezones = [];
 
@@ -28,6 +28,10 @@ class _TimezonesState extends State<Timezones> {
       setState(() => timezones = jsonDecode(response.body));
       Future.delayed(const Duration(), () => context.loaderOverlay.hide());
     } catch (err) {
+      if (err.toString().contains('HandshakeException')) {
+        await getTimezones();
+        return;
+      }
       context.loaderOverlay.hide();
       errorSign = 'Could not load regions due to a network error.';
       setState(() => timezones = null);
@@ -126,6 +130,7 @@ class _TimezonesState extends State<Timezones> {
                                           borderRadius:
                                               BorderRadius.circular(20)),
                                       onTap: () {
+                                        FocusScope.of(context).unfocus();
                                         Navigator.push(
                                             context,
                                             MaterialPageRoute(

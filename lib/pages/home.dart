@@ -32,6 +32,10 @@ class _HomeState extends State<Home> {
           .replaceAll('"', '')
           .substring(1);
     } catch (err) {
+      if (err.toString().contains('HandshakeException')) {
+        await getUserTimezone();
+        return;
+      }
       context.loaderOverlay.hide();
       setState(() {
         if (!userTimezone.contains('/')) {
@@ -63,6 +67,10 @@ class _HomeState extends State<Home> {
         });
       });
     } catch (err) {
+      if (err.toString().contains('HandshakeException')) {
+        await getTime(timezone);
+        return;
+      }
       context.loaderOverlay.hide();
       setState(() => time = 'Error fetching time');
       return;
@@ -184,9 +192,7 @@ class _HomeState extends State<Home> {
                     'Choose another region',
                     style: TextStyle(fontSize: 20),
                   ),
-                  onPressed: () => widget.timezone == null
-                      ? Navigator.popAndPushNamed(context, '/timezones')
-                      : Navigator.pop(context)),
+                  onPressed: () => Navigator.pushNamed(context, '/timezones')),
             ],
           ),
         ),
