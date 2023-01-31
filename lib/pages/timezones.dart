@@ -13,23 +13,25 @@ class Timezones extends StatefulWidget {
 }
 
 class _TimezonesState extends State<Timezones> {
-  String errorSign = '';
+  String errorSign = 'Fetching regions...';
   dynamic timezones;
   List<String> searchedTimezones = [];
 
   final textController = TextEditingController();
 
   Future<void> getTimezones() async {
+    context.loaderOverlay.show();
+    setState(() => errorSign = 'Fetching regions...');
     try {
-      context.loaderOverlay.show();
       Response response =
           await get(Uri.parse('https://worldtimeapi.org/api/timezone/'));
-      Future.delayed(
-          const Duration(seconds: 1), () => context.loaderOverlay.hide());
       setState(() => timezones = jsonDecode(response.body));
+      Future.delayed(const Duration(), () => context.loaderOverlay.hide());
     } catch (err) {
-      errorSign = 'Could not load timezones due to a network error.';
+      context.loaderOverlay.hide();
+      errorSign = 'Could not load regions due to a network error.';
       setState(() => timezones = null);
+      return;
     }
   }
 
@@ -41,6 +43,9 @@ class _TimezonesState extends State<Timezones> {
           if (timezone
               .replaceAll('/', ' - ')
               .replaceAll('_', ' ')
+              .split(' - ')
+              .reversed
+              .join(', ')
               .toLowerCase()
               .contains(textController.text.toLowerCase())) {
             searchedTimezones.add(timezone);
@@ -70,7 +75,7 @@ class _TimezonesState extends State<Timezones> {
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(10))),
           title: const Text(
-            'Timezones',
+            'Regions',
             style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20),
           ),
           backgroundColor: Colors.red,
@@ -81,7 +86,8 @@ class _TimezonesState extends State<Timezones> {
             ? Column(
                 children: [
                   Container(
-                    margin: const EdgeInsets.fromLTRB(20, 5, 20, 5),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                     child: TextField(
                       onChanged: (value) {
                         textController.text = value;
@@ -92,7 +98,7 @@ class _TimezonesState extends State<Timezones> {
                       controller: textController,
                       cursorColor: Colors.red,
                       decoration: const InputDecoration(
-                        hintText: 'Search for a timezone',
+                        hintText: 'Search for a region',
                       ),
                     ),
                   ),
@@ -143,9 +149,15 @@ class _TimezonesState extends State<Timezones> {
                                             ? timezones[i]
                                                 .replaceAll('/', ' - ')
                                                 .replaceAll('_', ' ')
+                                                .split(' - ')
+                                                .reversed
+                                                .join(', ')
                                             : searchedTimezones[i]
                                                 .replaceAll('/', ' - ')
-                                                .replaceAll('_', ' '),
+                                                .replaceAll('_', ' ')
+                                                .split(' - ')
+                                                .reversed
+                                                .join(', '),
                                         textAlign: TextAlign.center,
                                         style: const TextStyle(
                                             color: Colors.white,
@@ -161,7 +173,7 @@ class _TimezonesState extends State<Timezones> {
                         : Container(
                             margin: const EdgeInsets.only(top: 50),
                             child: const Text(
-                              'Timezone cannot be found.',
+                              'Region cannot be found.',
                               style: TextStyle(fontSize: 20),
                             )),
                   ),
@@ -171,14 +183,22 @@ class _TimezonesState extends State<Timezones> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      'Fetching timezones...',
-                      style: TextStyle(fontSize: 18),
+                    Text(
+                      errorSign,
+                      style: const TextStyle(fontSize: 20),
+                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    Text(errorSign)
+                    if (errorSign[0] != 'F')
+                      Column(
+                        children: [
+                          const SizedBox(height: 40),
+                          ElevatedButton(
+                            onPressed: getTimezones,
+                            child: const Text('Retry',
+                                style: TextStyle(fontSize: 20)),
+                          )
+                        ],
+                      ),
                   ],
                 ),
               ));

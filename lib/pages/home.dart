@@ -18,23 +18,28 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   Timer timer = Timer(const Duration(seconds: 1), () {});
-  String usrTimezone = '';
-  String? time;
+  String userTimezone = '', time = '';
 
-  Future<String> getUserTimezone() async {
+  Future<void> getUserTimezone() async {
     try {
       http.Response response =
           await http.get(Uri.parse('https://worldtimeapi.org/'));
       dom.Document html = parse(response.body);
-      String? userTimezone = html
-          .querySelector('code.language-shell')
-          ?.innerHtml
+      userTimezone = html
+          .querySelector('code.language-shell')!
+          .innerHtml
           .split('timezone')[1]
           .replaceAll('"', '')
           .substring(1);
-      return userTimezone!;
     } catch (err) {
-      return 'error';
+      context.loaderOverlay.hide();
+      setState(() {
+        if (!userTimezone.contains('/')) {
+          userTimezone = 'Error fetching region';
+        }
+        time = 'Error fetching time';
+      });
+      return;
     }
   }
 
@@ -42,37 +47,49 @@ class _HomeState extends State<Home> {
     try {
       http.Response response = await http
           .get(Uri.parse('https://worldtimeapi.org/api/timezone/$timezone'));
-      Future.delayed(const Duration(), () {
-        Map data = jsonDecode(response.body);
-        DateTime timeNow = DateTime.parse(data['datetime']);
-        String utcOffset = data['utc_offset'];
-        timeNow = timeNow.add(Duration(
-            hours: int.parse(utcOffset.substring(0, 3)),
-            minutes: int.parse(
-                '${utcOffset.substring(0, 1)}${utcOffset.substring(4)}')));
-        setState(
-            () => time = DateFormat("yyyy-MM-dd\nh:mm:ss a").format(timeNow));
-        timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-          setState(() {
-            timeNow = timeNow.add(const Duration(seconds: 1));
-            time = DateFormat("yyyy-MM-dd\nh:mm:ss a").format(timeNow);
-          });
+      Map data = jsonDecode(response.body);
+      DateTime timeNow = DateTime.parse(data['datetime']);
+      String utcOffset = data['utc_offset'];
+      timeNow = timeNow.add(Duration(
+          hours: int.parse(utcOffset.substring(0, 3)),
+          minutes: int.parse(
+              '${utcOffset.substring(0, 1)}${utcOffset.substring(4)}')));
+      setState(
+          () => time = DateFormat("yyyy-MM-dd\nh:mm:ss a").format(timeNow));
+      timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        setState(() {
+          timeNow = timeNow.add(const Duration(seconds: 1));
+          time = DateFormat("yyyy-MM-dd\nh:mm:ss a").format(timeNow);
         });
       });
     } catch (err) {
-      setState(() => time = 'Unkown error!');
+      context.loaderOverlay.hide();
+      setState(() => time = 'Error fetching time');
+      return;
     }
   }
 
   Future<void> showTime() async {
     context.loaderOverlay.show();
-    if (widget.timezone == null) {
-      usrTimezone = await getUserTimezone();
-      await getTime(usrTimezone);
-    } else {
-      await getTime(widget.timezone!);
+    setState(() {
+      if (!userTimezone.contains('/')) {
+        userTimezone = 'Fetching region...';
+      }
+      time = 'Fetching time...';
+    });
+    try {
+      if (widget.timezone == null) {
+        await getUserTimezone();
+        await getTime(userTimezone);
+      } else {
+        await getTime(widget.timezone!);
+      }
+      Future.delayed(const Duration(), () => context.loaderOverlay.hide());
+    } catch (err) {
+      context.loaderOverlay.hide();
+      setState(() => time = 'Error fetching time');
+      return;
     }
-    Future.delayed(const Duration(), () => context.loaderOverlay.hide());
   }
 
   @override
@@ -112,7 +129,7 @@ class _HomeState extends State<Home> {
                             .split(' - ')
                             .reversed
                             .join(', ') ??
-                        usrTimezone
+                        userTimezone
                             .replaceAll('/', ' - ')
                             .replaceAll('_', ' ')
                             .split(' - ')
@@ -122,21 +139,44 @@ class _HomeState extends State<Home> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 50),
-                  Column(
-                    children: [
-                      Text(
-                        time?.split('\n')[0] ?? 'Loading...',
-                        style: const TextStyle(fontSize: 30),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        time?.split('\n')[1] ?? 'Loading...',
-                        style: const TextStyle(fontSize: 40),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  )
+                  if (time.contains('\n'))
+                    Column(
+                      children: [
+                        Text(
+                          time.split('\n')[0],
+                          style: const TextStyle(fontSize: 30),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          time.split('\n')[1],
+                          style: const TextStyle(fontSize: 40),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    )
+                  else
+                    Column(
+                      children: [
+                        Text(
+                          time,
+                          style: const TextStyle(fontSize: 30),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (time[0] != 'F')
+                          Column(
+                            children: [
+                              const SizedBox(height: 40),
+                              ElevatedButton(
+                                  onPressed: showTime,
+                                  child: const Text(
+                                    'Retry',
+                                    style: TextStyle(fontSize: 20),
+                                  ))
+                            ],
+                          ),
+                      ],
+                    ),
                 ],
               ),
               ElevatedButton(
