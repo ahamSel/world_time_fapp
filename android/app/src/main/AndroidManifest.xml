@@ -2,9 +2,9 @@
     package="com.example.world_time_fapp">
    <uses-permission android:name="android.permission.INTERNET"/>
    <application
-        android:label="world_time_fapp"
+        android:label="WorldTime"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_worldtime">
         <activity
             android:name=".MainActivity"
             android:exported="true"
