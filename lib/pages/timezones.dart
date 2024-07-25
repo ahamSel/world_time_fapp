@@ -32,7 +32,9 @@ class _TimezonesState extends State<Timezones> {
         await getTimezones();
         return;
       }
-      context.loaderOverlay.hide();
+      if (mounted) {
+        context.loaderOverlay.hide();
+      }
       errorSign = 'Could not load regions due to a network error.';
       setState(() => timezones = null);
       return;
@@ -76,11 +78,13 @@ class _TimezonesState extends State<Timezones> {
     return Scaffold(
         backgroundColor: Colors.red[100],
         appBar: AppBar(
+          iconTheme: const IconThemeData(color: Colors.white),
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(10))),
           title: const Text(
             'Regions',
-            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20),
+            style: TextStyle(
+                fontWeight: FontWeight.w900, fontSize: 20, color: Colors.white),
           ),
           backgroundColor: Colors.red,
           centerTitle: true,

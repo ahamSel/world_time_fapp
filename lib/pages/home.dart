@@ -36,7 +36,9 @@ class _HomeState extends State<Home> {
         await getUserTimezone();
         return;
       }
-      context.loaderOverlay.hide();
+      if (mounted) {
+        context.loaderOverlay.hide();
+      }
       setState(() {
         if (!userTimezone.contains('/')) {
           userTimezone = 'Error fetching region';
@@ -71,7 +73,9 @@ class _HomeState extends State<Home> {
         await getTime(timezone);
         return;
       }
-      context.loaderOverlay.hide();
+      if (mounted) {
+        context.loaderOverlay.hide();
+      }
       setState(() => time = 'Error fetching time');
       return;
     }
@@ -94,7 +98,9 @@ class _HomeState extends State<Home> {
       }
       Future.delayed(const Duration(), () => context.loaderOverlay.hide());
     } catch (err) {
-      context.loaderOverlay.hide();
+      if (mounted) {
+        context.loaderOverlay.hide();
+      }
       setState(() => time = 'Error fetching time');
       return;
     }
@@ -143,7 +149,8 @@ class _HomeState extends State<Home> {
                             .split(' - ')
                             .reversed
                             .join(', '),
-                    style: const TextStyle(fontSize: 40),
+                    style: const TextStyle(
+                        fontSize: 40, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 50),
@@ -152,13 +159,15 @@ class _HomeState extends State<Home> {
                       children: [
                         Text(
                           time.split('\n')[0],
-                          style: const TextStyle(fontSize: 30),
+                          style: const TextStyle(
+                              fontSize: 30, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 10),
                         Text(
                           time.split('\n')[1],
-                          style: const TextStyle(fontSize: 40),
+                          style: const TextStyle(
+                              fontSize: 40, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -190,7 +199,10 @@ class _HomeState extends State<Home> {
               ElevatedButton(
                   child: const Text(
                     'Choose another region',
-                    style: TextStyle(fontSize: 20),
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
                   onPressed: () => Navigator.pushNamed(context, '/timezones')),
             ],

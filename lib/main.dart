@@ -47,17 +47,17 @@ class MyApp extends StatelessWidget {
                   borderRadius: BorderRadius.all(Radius.circular(10)))),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
-                overlayColor: MaterialStateProperty.all(Colors.redAccent),
-                padding: MaterialStateProperty.all(const EdgeInsets.all(13)),
-                backgroundColor: MaterialStateProperty.all(Colors.red),
-                shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                overlayColor: WidgetStateProperty.all(Colors.redAccent),
+                padding: WidgetStateProperty.all(const EdgeInsets.all(13)),
+                backgroundColor: WidgetStateProperty.all(Colors.red),
+                shape: WidgetStateProperty.all(RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20)))),
           ),
           scrollbarTheme: ScrollbarThemeData(
               interactive: true,
               radius: const Radius.circular(5),
-              thickness: MaterialStateProperty.all(13),
-              thumbColor: MaterialStateProperty.all(Colors.red)),
+              thickness: WidgetStateProperty.all(13),
+              thumbColor: WidgetStateProperty.all(Colors.red)),
         ));
   }
 }
