@@ -149,8 +149,7 @@ class _HomeState extends State<Home> {
                             .split(' - ')
                             .reversed
                             .join(', '),
-                    style: const TextStyle(
-                        fontSize: 40, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 40),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 50),
@@ -159,15 +158,13 @@ class _HomeState extends State<Home> {
                       children: [
                         Text(
                           time.split('\n')[0],
-                          style: const TextStyle(
-                              fontSize: 30, fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontSize: 30),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 10),
                         Text(
                           time.split('\n')[1],
-                          style: const TextStyle(
-                              fontSize: 40, fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontSize: 40),
                           textAlign: TextAlign.center,
                         ),
                       ],
