@@ -19,14 +19,14 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         initialRoute: '/home',
         routes: {
-          '/home': (context) => const LoaderOverlay(
+          '/home': (context) => LoaderOverlay(
               useDefaultLoading: false,
-              overlayWidget: Loading(),
-              child: Home()),
-          '/timezones': (context) => const LoaderOverlay(
+              overlayWidgetBuilder: (progress) => const Loading(),
+              child: const Home()),
+          '/timezones': (context) => LoaderOverlay(
               useDefaultLoading: false,
-              overlayWidget: Loading(),
-              child: Timezones()),
+              overlayWidgetBuilder: (progress) => const Loading(),
+              child: const Timezones()),
         },
         theme: ThemeData(
           fontFamily: 'Lexend',

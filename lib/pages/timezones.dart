@@ -141,8 +141,9 @@ class _TimezonesState extends State<Timezones> {
                                                 builder: (context) =>
                                                     LoaderOverlay(
                                                       useDefaultLoading: false,
-                                                      overlayWidget:
-                                                          const Loading(),
+                                                      overlayWidgetBuilder:
+                                                          (progress) =>
+                                                              const Loading(),
                                                       child: Home(
                                                         timezone: searchedTimezones
                                                                 .isEmpty
