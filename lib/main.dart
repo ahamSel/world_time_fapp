@@ -20,11 +20,9 @@ class MyApp extends StatelessWidget {
         initialRoute: '/home',
         routes: {
           '/home': (context) => LoaderOverlay(
-              useDefaultLoading: false,
               overlayWidgetBuilder: (progress) => const Loading(),
               child: const Home()),
           '/timezones': (context) => LoaderOverlay(
-              useDefaultLoading: false,
               overlayWidgetBuilder: (progress) => const Loading(),
               child: const Timezones()),
         },
